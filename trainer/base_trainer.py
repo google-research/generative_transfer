@@ -51,17 +51,16 @@ class TrainMetrics(metrics.Collection):
 
 
 def save_checkpoint(state, workdir, keep=100, keep_every_n_steps=None):
-  if jax.process_index() == 0:
-    # get train state from the first replica
-    state = jax.device_get(jax.tree_map(lambda x: x[0], state))
-    step = int(state.step)
-    flax_checkpoints.save_checkpoint(
-        workdir,
-        state,
-        step,
-        keep=keep,
-        overwrite=True,
-        keep_every_n_steps=keep_every_n_steps)
+  # get train state from the first replica
+  state = jax.device_get(jax.tree_map(lambda x: x[0], state))
+  step = int(state.step)
+  flax_checkpoints.save_checkpoint_multiprocess(
+      workdir,
+      state,
+      step,
+      keep=keep,
+      overwrite=True,
+      keep_every_n_steps=keep_every_n_steps)
 
 
 class BaseTrainer(abc.ABC):
